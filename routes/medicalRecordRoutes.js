@@ -2,17 +2,17 @@ const express = require('express');
 const {
   createMedicalRecord,
   getAllMedicalRecords,
-  getMedicalRecord,
+  getMedicalRecordById,
   updateMedicalRecord,
   deleteMedicalRecord,
 } = require('../controllers/medicalRecordController');
 
 const router = express.Router();
 
-router.post('/', createMedicalRecord);
-router.get('/', getAllMedicalRecords);
-router.get('/:id', getMedicalRecord);
-router.put('/:id', updateMedicalRecord);
-router.delete('/:id', deleteMedicalRecord);
+router.post('/create-medical-records', createMedicalRecord);
+router.get('/gell-all-medical-records', getAllMedicalRecords);
+router.get('/get-medical-record/:id', getMedicalRecordById);
+router.put('/update-medical-record/:id', updateMedicalRecord);
+router.delete('/delete-medical-record/:id', deleteMedicalRecord);
 
 module.exports = router;

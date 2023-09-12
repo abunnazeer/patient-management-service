@@ -37,7 +37,7 @@ const patientSchema = new mongoose.Schema({
   },
   gender: {
     type: String,
-    enum: ['Male', 'Female', 'Other'],
+    enum: ['Male', 'Female', 'Other', 'MALE', 'FEMALE', 'OTHER'],
     required: true,
   },
   contact: {
@@ -65,10 +65,27 @@ const patientSchema = new mongoose.Schema({
   },
 });
 
+// const encryptHealthRecords = (value) => {
+//   // Your encryption logic here
+//   // For demonstration, just reversing the string
+//   return value.split('').reverse().join('');
+// };
+
+// // Add pre hook for findOneAndUpdate
+// patientSchema.pre('findOneAndUpdate', function (next) {
+//   if (this._update.healthRecords) {
+//     this._update.healthRecords = encryptHealthRecords(
+//       this._update.healthRecords
+//     );
+//   }
+//   next();
+// });
 patientSchema.plugin(encrypt, {
   encryptionKey: encKey,
   signingKey: sigKey,
   encryptedFields: ['healthRecords'],
 });
+
+
 
 module.exports = mongoose.model('Patient', patientSchema);

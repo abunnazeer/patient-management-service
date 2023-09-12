@@ -1,46 +1,60 @@
 const express = require('express');
-const dotenv =require('dotenv')
+const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const morgan = require('morgan');
+const winston = require('winston');
+const client = require('prom-client');
 const patientRoutes = require('./routes/patientRoutes');
 const medicalRecordRoutes = require('./routes/medicalRecordRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
+// Initialize Prometheus metrics
+const collectDefaultMetrics = client.collectDefaultMetrics;
+collectDefaultMetrics({ timeout: 5000 });
 
-// Load environment variables
-
-const app = express();
-
+// Create Winston logger
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.json(),
+  transports: [
+    new winston.transports.File({ filename: 'error.log', level: 'error' }),
+    new winston.transports.File({ filename: 'combined.log' }),
+  ],
+});
 
 dotenv.config({ path: './config.env' });
-// console.log(process.env);  // Debugging line
-// console.log('DB_ENCRYPTION_KEY from env:', process.env.DB_ENCRYPTION_KEY);
-// console.log('DB_SIGNING_KEY from env:', process.env.DB_SIGNING_KEY);
-
 const dbURI = process.env.DATABASE.replace(
   '<PASSWORD>',
   process.env.DATABASE_PASSWORD
-  );
-  
-  
+);
 
 mongoose
-  .connect(dbURI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => console.log('MongoDB Connected'))
-  .catch((err) => console.log(err));
+  .connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => logger.info('MongoDB Connected'))
+  .catch((err) => logger.error(err));
+
+const app = express();
 
 // Middleware
 app.use(bodyParser.json());
 
+// Morgan for HTTP request logging
+app.use(morgan('combined'));
+
 // Patient Routes
 app.use('/api/v1/patients', patientRoutes);
-app.use('/api/v1/medicalRecords', medicalRecordRoutes);
+app.use('/api/v1/medical-records', medicalRecordRoutes);
 // Mount the appointment routes
 app.use('/api/v1/appointments', appointmentRoutes);
+
+// Prometheus metrics endpoint
+app.get('/metrics', (req, res) => {
+  res.set('Content-Type', client.register.contentType);
+  res.end(client.register.metrics());
+});
+
 // Start the server
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
+  logger.info(`Server running on http://localhost:${port}`);
 });

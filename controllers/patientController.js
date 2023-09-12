@@ -29,15 +29,17 @@ exports.getPatientById = async (req, res) => {
   }
 };
 
+
 exports.updatePatientById = async (req, res) => {
   try {
-    const updatedPatient = await Patient.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
-    if (!updatedPatient)
-      return res.status(404).json({ message: 'Patient not found' });
+    let patient = await Patient.findById(req.params.id);
+    if (!patient) return res.status(404).json({ message: 'Patient not found' });
+
+    // Update fields here
+    patient.healthRecords = req.body.healthRecords;
+
+    const updatedPatient = await patient.save();
+
     res
       .status(200)
       .json({ message: 'Patient updated successfully', updatedPatient });
