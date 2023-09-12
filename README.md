@@ -39,8 +39,13 @@ The Patient Management Service is a key component of a larger Health Management 
 
    Create a `.env` file in the root directory and add your environment variables.
    ```
-   DB_URI=mongodb://localhost:27017/your-database
-   PORT=3000
+NODE_ENV=development
+PORT=3000
+DATABASE=mongodb+srv://username:<PASSWORD>@v4c.vssb1gm.mongodb.net/
+DATABASE_PASSWORD=your password 
+DB_ENCRYPTION_KEY=
+DB_SIGNING_KEY=
+
    ```
 
 5. **Run the Service**
